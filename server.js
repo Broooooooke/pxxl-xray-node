@@ -1,13 +1,30 @@
 const fs = require('fs');
+const os = require('os');
 const path = require('path');
-const { spawn } = require('child_process');
+const { spawn, execFileSync } = require('child_process');
 const crypto = require('crypto');
 const PORT = process.env.PORT || 8080;
 const UUID = process.env.UUID || '';
 const WSPATH = process.env.WSPATH || '/ws';
 const FALLBACK = process.env.PATH_REGEX || '.*';
-const XRAY = path.join(__dirname, 'web-worker');
-const CONFIG = path.join(__dirname, 'config.json');
+// Pxxl runs `node server.js` (not `npm start`) and mounts the app dir
+// read-only at runtime, so the Xray binary is fetched at build time
+// (postinstall) and the generated config must live in a writable dir.
+const CONFIG = path.join(os.tmpdir(), 'config.json');
+function findXray() {
+  for (const p of [path.join(__dirname, 'web-worker'), path.join(os.tmpdir(), 'web-worker')]) {
+    if (fs.existsSync(p)) return p;
+  }
+  return null;
+}
+let XRAY = findXray();
+if (!XRAY) {
+  // Build-time download was skipped or the binary was not packaged:
+  // setup.js downloads to the tmp dir when the app dir is read-only.
+  execFileSync('node', [path.join(__dirname, 'setup.js')], { stdio: 'inherit' });
+  XRAY = findXray();
+}
+if (!XRAY) throw new Error('xray binary not found');
 function isUUID(v) {
   return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(v);
 }
