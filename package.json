@@ -5,6 +5,7 @@
   "description": "Node wrapper that downloads Xray and serves VLESS+WS on Pxxl Free.",
   "main": "server.js",
   "scripts": {
+    "postinstall": "node setup.js",
     "prestart": "node setup.js",
     "start": "node server.js"
   },
