@@ -1,0 +1,14 @@
+{
+  "name": "pxxl-xray-node",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Node wrapper that downloads Xray and serves VLESS+WS on Pxxl Free.",
+  "main": "server.js",
+  "scripts": {
+    "prestart": "node setup.js",
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
